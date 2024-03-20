@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carros</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+    
+</head>
+
+<body>
+
+
+    <div id="posicao1"></div>
+
+    <script type="text/babel">
+        //css todo feito na maquina do mal
+        function CadastrarCarro(event) {
+            event.preventDefault();
+            let formData = new FormData(event.target);
+            let carroData = {
+                nome: formData.get('nome'),
+                ano: formData.get('ano'),
+                potencia: formData.get('potencia'),
+                preco: formData.get('preco'),
+                fabricante: formData.get('fabricante')
+            };
+            let options = {
+                method: "POST",
+                body: JSON.stringify(carroData),
+                headers: {
+                    "Content-type": "application/json"
+                }
+            };
+            fetch("https://ifsp.ddns.net/webservices/carro/carro", options)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao cadastrar carro');
+                    }
+                    console.log('Carro cadastrado com sucesso!');
+
+                    document.getElementById('carroForm').reset();
+                    window.location.reload(true)
+                })
+                .catch(error => {
+                    console.error('Erro ao cadastrar carro:', error);
+                    alert('Ocorreu um erro ao cadastrar o carro. Por favor, tente novamente.');
+                });
+        }
+        function ExibirEdicao({ carro, fecharFormularioEdicao }) {
+            const [carroEditado, setCarroEditado] = React.useState(carro);
+
+            function EditarCarro(event) {
+                event.preventDefault();
+                let formData = new FormData(event.target);
+                let carroData = {
+                    nome: formData.get('nome'),
+                    ano: formData.get('ano'),
+                    potencia: formData.get('potencia'),
+                    preco: formData.get('preco'),
+                    fabricante: formData.get('fabricante')
+                };
+                let options = {
+                    method: "PUT",
+                    body: JSON.stringify(carroData),
+                    headers: {
+                        "Content-type": "application/json"
+                    }
+                };
+                fetch(`https://ifsp.ddns.net/webservices/carro/carro/${carro.id}`, options)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro ao editar carro');
+                        }
+                        console.log('Carro editado com sucesso!');
+
+                        window.location.reload(true);
+                    })
+                    .catch(error => {
+                        console.error('Erro ao editar carro:', error);
+                        alert('Ocorreu um erro ao editar o carro. Por favor, tente novamente.');
+                    });
+            }
+
+            return (
+                <form onSubmit={EditarCarro}>
+                    <br></br>
+                    <label htmlFor="nome">Nome</label>
+                    <input id="nome" type="text" name="nome" defaultValue={carro.nome} required></input>
+                    <br></br>
+
+                    <label htmlFor="ano">Ano do carro</label>
+                    <input id="ano" type="number" name="ano" defaultValue={carro.ano} required></input>
+                    <br></br>
+                    <label htmlFor="potencia">Potência</label>
+
+                    <input id="potencia" type="number" name="potencia" defaultValue={carro.potencia} required></input>
+                    <br></br>
+                    <label htmlFor="preco" required>Preço</label>
+                    <input id="preco" type="number" name="preco" defaultValue={carro.preco} required></input>
+                    <br></br>
+
+                    <label htmlFor="fabricante">Fabricante</label>
+                    <input id="fabricante" type="text" name="fabricante" defaultValue={carro.fabricante} required></input>
+                    <br></br>
+                    <div className="button-group">
+                        <button type="submit">Editar</button>
+                        <button type="button" onClick={fecharFormularioEdicao}>Fechar</button> {/* Botão para fechar o formulário */}
+                    </div>
+                </form>
+            )
+        }
+
+        function ExibirCadastro({ setExibirCadastro, fecharFormularioCadastro }) {
+            return (
+                <React.Fragment>
+                    <form id="carroForm" onSubmit={CadastrarCarro}>
+                        <br></br>
+                        <label htmlFor="nome">Nome</label>
+                        <input id="nome" type="text" name="nome" required></input>
+                        <br></br>
+
+                        <label htmlFor="ano">Ano do carro</label>
+                        <input id="ano" type="number" name="ano" required></input>
+                        <br></br>
+                        <label htmlFor="potencia">Potência</label>
+
+                        <input id="potencia" type="number" name="potencia" required></input>
+                        <br></br>
+                        <label htmlFor="preco" required>Preço</label>
+                        <input id="preco" type="number" name="preco" required></input>
+                        <br></br>
+
+                        <label htmlFor="fabricante">Fabricante</label>
+                        <input id="fabricante" type="text" name="fabricante" required></input>
+                        <br></br>
+                        <div className="button-group">
+                            <button type="submit">Enviar</button>
+                            <button type="button" onClick={fecharFormularioCadastro}>Fechar</button> {/* Botão para fechar o formulário */}
+                        </div>
+                    </form>
+                </React.Fragment>
+            )
+        }
+
+        function ListaCarros(props) {
+            const [carros, setCarros] = React.useState([]);
+            const [exibirCadastro, setExibirCadastro] = React.useState(false);
+            const [exibirEdicao, setExibirEdicao] = React.useState(false);
+            const [carroEditado, setCarroEditado] = React.useState(null);
+
+            React.useEffect(() => {
+                fetch("https://ifsp.ddns.net/webservices/carro/carro")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro ao carregar lista de carros");
+                        }
+                        return response.json();
+                    })
+                    .then(carros => {
+                        console.log(carros);
+                        setCarros(carros);
+                    })
+                    .catch(error => {
+                        console.log("Erro na requisição dos carros", error);
+                    });
+            }, []);
+
+            const fecharFormularioCadastro = () => {
+                setExibirCadastro(false);
+            };
+
+            const fecharFormularioEdicao = () => {
+                setExibirEdicao(false);
+            };
+
+            return (
+                <div>
+                    <h2>Lista de Carros</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Ano</th>
+                                <th>Potência</th>
+                                <th>Preço</th>
+                                <th>Fabricante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {carros.map(carro => (
+                                <tr key={carro.id}>
+                                    <td>{carro.nome}</td>
+                                    <td>{carro.ano}</td>
+                                    <td>{carro.potencia}</td>
+                                    <td>{carro.preco}</td>
+                                    <td>{carro.fabricante}</td>
+                                    <td>
+                                        <button onClick={() => {
+                                            fetch("https://ifsp.ddns.net/webservices/carro/carro/" + `${carro.id}`, {
+                                                method: "DELETE"
+                                            })
+                                                .then(resposta => {
+                                                    if (!resposta.ok) {
+                                                        throw new Error("Houve algum erro");
+                                                    }
+                                                    return resposta.json();
+                                                })
+                                                .then(aluno => {
+                                                    console.log("carro deletado com sucesso!");
+                                                    window.location.reload(true)
+                                                })
+                                                .catch(erro => {
+                                                    console.error("Erro encontrado ao deletar o carro: ", erro);
+                                                });
+                                        }}>Apagar</button>
+                                    </td>
+                                    <td>
+                                        <button onClick={() => {
+                                            setExibirEdicao(true);
+                                            setCarroEditado(carro);
+                                        }}>Editar</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <button onClick={() => setExibirCadastro(true)}>Cadastrar Novo Carro</button>
+                    {exibirCadastro && <ExibirCadastro fecharFormularioCadastro={fecharFormularioCadastro} />}
+                    {exibirEdicao && <ExibirEdicao carro={carroEditado} fecharFormularioEdicao={fecharFormularioEdicao} />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ListaCarros />, document.getElementById("posicao1"));
+    </script>
+</body>
+
+</html>
